@@ -1,11 +1,11 @@
 <Solution>
   <Folder Name="/src/">
-    <Project Path="src/Syon.TimeDashboard.Core/Syon.TimeDashboard.Core.csproj" />
-    <Project Path="src/Syon.TimeDashboard.Infrastructure/Syon.TimeDashboard.Infrastructure.csproj" />
-    <Project Path="src/Syon.TimeDashboard.UI/Syon.TimeDashboard.UI.csproj" />
-    <Project Path="src/Syon.TimeDashboard/Syon.TimeDashboard.csproj" />
+    <Project Path="src/TimeTile.Core/TimeTile.Core.csproj" />
+    <Project Path="src/TimeTile.Infrastructure/TimeTile.Infrastructure.csproj" />
+    <Project Path="src/TimeTile.UI/TimeTile.UI.csproj" />
+    <Project Path="src/TimeTile/TimeTile.csproj" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="tests/Syon.TimeDashboard.Tests/Syon.TimeDashboard.Tests.csproj" />
+    <Project Path="tests/TimeTile.Tests/TimeTile.Tests.csproj" />
   </Folder>
 </Solution>

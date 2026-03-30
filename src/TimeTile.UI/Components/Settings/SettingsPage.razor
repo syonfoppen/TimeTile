@@ -1,0 +1,157 @@
+@page "/settings"
+@inherits FluxorComponent
+
+@inject IState<AuthState> AuthState
+@inject IDispatcher Dispatcher
+@inject ISettingsRepository SettingsRepo
+
+<div class="page-header">
+    <h1 class="page-title">Settings</h1>
+</div>
+
+<div class="settings-sections">
+    <section class="settings-section">
+        <h2 class="settings-section-title">Azure DevOps Connection</h2>
+        <div class="auth-card">
+            <div class="auth-status-row">
+                <span class="status-dot @(AuthState.Value.AzDoStatus == AuthStatus.Authenticated ? "connected" : "disconnected")"></span>
+                <span>@GetAzDoStatusText()</span>
+            </div>
+            @if (AuthState.Value.AzDoStatus == AuthStatus.Authenticated)
+            {
+                <div class="auth-info">Signed in as @AuthState.Value.AzDoUserName</div>
+                <button class="btn btn-secondary" @onclick="SignOutAzDo">Sign Out</button>
+            }
+            else
+            {
+                <button class="btn btn-primary" @onclick="SignInAzDo"
+                        disabled="@(AuthState.Value.AzDoStatus == AuthStatus.Authenticating)">
+                    @(AuthState.Value.AzDoStatus == AuthStatus.Authenticating ? "Signing in..." : "Sign In with Microsoft")
+                </button>
+            }
+        </div>
+    </section>
+
+    <section class="settings-section">
+        <h2 class="settings-section-title">7pace Timetracker Connection</h2>
+        <div class="auth-card">
+            <div class="auth-status-row">
+                <span class="status-dot @(AuthState.Value.SevenPaceStatus == AuthStatus.Authenticated ? "connected" : "disconnected")"></span>
+                <span>@GetSevenPaceStatusText()</span>
+            </div>
+
+            @switch (AuthState.Value.SevenPaceStatus)
+            {
+                case AuthStatus.Authenticated:
+                    <div class="auth-info">Connected as @AuthState.Value.SevenPaceUserName</div>
+                    <button class="btn btn-secondary" @onclick="DisconnectSevenPace">Disconnect</button>
+                    break;
+
+                default:
+                    @if (AuthState.Value.PairingStatus == PinPairingStatus.PinCreated || AuthState.Value.PairingStatus == PinPairingStatus.WaitingForValidation)
+                    {
+                        <div class="pin-display">
+                            <div class="pin-label">Enter this PIN in 7pace Timetracker:</div>
+                            <div class="pin-code">@AuthState.Value.PairingPin</div>
+                            <div class="pin-hint">Go to 7pace Timetracker &gt; Settings &gt; API &gt; Pair Device</div>
+                        </div>
+                    }
+                    else
+                    {
+                        <button class="btn btn-primary" @onclick="StartPairing"
+                                disabled="@(AuthState.Value.PairingStatus == PinPairingStatus.WaitingForValidation)">
+                            Start PIN Pairing
+                        </button>
+                    }
+                    break;
+            }
+
+            @if (!string.IsNullOrEmpty(AuthState.Value.ErrorMessage))
+            {
+                <div class="auth-error">@AuthState.Value.ErrorMessage</div>
+            }
+        </div>
+    </section>
+
+    <section class="settings-section">
+        <h2 class="settings-section-title">Organization</h2>
+        <div class="settings-form">
+            <div class="form-group">
+                <label class="form-label">Azure DevOps Organization URL</label>
+                <input class="input" type="url" placeholder="https://dev.azure.com/your-org"
+                       @bind="azDoOrgUrl" />
+            </div>
+            <div class="form-group">
+                <label class="form-label">7pace API Base URL</label>
+                <input class="input" type="url" placeholder="https://softwareblocks.timehub.7pace.com/"
+                       @bind="sevenPaceApiUrl" />
+            </div>
+            <div class="form-group">
+                <label class="form-label">Default Project</label>
+                <input class="input" type="text" placeholder="MyProject"
+                       @bind="defaultProject" />
+            </div>
+            <div class="form-group">
+                <label class="form-label">Default Team</label>
+                <input class="input" type="text" placeholder="MyTeam"
+                       @bind="defaultTeam" />
+            </div>
+            <button class="btn btn-primary" @onclick="SaveSettings">Save Settings</button>
+        </div>
+    </section>
+</div>
+
+@code {
+    private string azDoOrgUrl = "";
+    private string sevenPaceApiUrl = "";
+    private string defaultProject = "";
+    private string defaultTeam = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        var settings = await SettingsRepo.GetSettingsAsync();
+        if (settings is not null)
+        {
+            azDoOrgUrl = settings.AzureDevOpsOrgUrl;
+            sevenPaceApiUrl = settings.SevenPaceApiBaseUrl;
+            defaultProject = settings.DefaultProject;
+            defaultTeam = settings.DefaultTeam;
+        }
+        Dispatcher.Dispatch(new RestoreAuthStateAction());
+    }
+
+    private void SignInAzDo() => Dispatcher.Dispatch(new AzDoSignInAction());
+    private void SignOutAzDo() => Dispatcher.Dispatch(new AzDoSignOutAction());
+    private void StartPairing() => Dispatcher.Dispatch(new SevenPaceStartPairingAction());
+    private void DisconnectSevenPace() => Dispatcher.Dispatch(new SevenPaceSignOutAction());
+
+    private async Task SaveSettings()
+    {
+        var settings = new AppSettings
+        {
+            AzureDevOpsOrgUrl = azDoOrgUrl,
+            SevenPaceApiBaseUrl = sevenPaceApiUrl,
+            DefaultProject = defaultProject,
+            DefaultTeam = defaultTeam
+        };
+        await SettingsRepo.SaveSettingsAsync(settings);
+    }
+
+    private string GetAzDoStatusText() => AuthState.Value.AzDoStatus switch
+    {
+        AuthStatus.Authenticated => "Connected",
+        AuthStatus.Authenticating => "Connecting...",
+        AuthStatus.Failed => "Connection failed",
+        AuthStatus.Expired => "Session expired",
+        _ => "Not connected"
+    };
+
+    private string GetSevenPaceStatusText() => AuthState.Value.SevenPaceStatus switch
+    {
+        AuthStatus.Authenticated => "Connected",
+        AuthStatus.Authenticating => "Pairing...",
+        AuthStatus.Failed => "Connection failed",
+        _ => "Not connected"
+    };
+}

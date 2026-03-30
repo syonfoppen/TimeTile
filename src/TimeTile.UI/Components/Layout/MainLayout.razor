@@ -1,0 +1,24 @@
+@using TimeTile.UI.Store.Auth
+@inherits LayoutComponentBase
+@inject IDispatcher Dispatcher
+
+<Fluxor.Blazor.Web.StoreInitializer />
+
+<div class="app-shell">
+    <NavMenu />
+
+    <div class="main-content">
+        <ActiveTimerBar />
+
+        <div class="page-content">
+            @Body
+        </div>
+    </div>
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        Dispatcher.Dispatch(new RestoreAuthStateAction());
+    }
+}

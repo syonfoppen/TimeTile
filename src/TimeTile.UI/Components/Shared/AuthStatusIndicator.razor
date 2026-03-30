@@ -1,0 +1,11 @@
+@inherits FluxorComponent
+
+@inject IState<AuthState> AuthState
+
+<div class="auth-status">
+    <span class="auth-dot @(AuthState.Value.AzDoStatus == AuthStatus.Authenticated ? "connected" : AuthState.Value.AzDoStatus == AuthStatus.Authenticating ? "connecting" : "disconnected")"></span>
+    <span class="auth-label">AzDO</span>
+
+    <span class="auth-dot @(AuthState.Value.SevenPaceStatus == AuthStatus.Authenticated ? "connected" : AuthState.Value.SevenPaceStatus == AuthStatus.Authenticating ? "connecting" : "disconnected")"></span>
+    <span class="auth-label">7pace</span>
+</div>

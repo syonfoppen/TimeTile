@@ -1,0 +1,20 @@
+@if (!string.IsNullOrEmpty(Message))
+{
+    <div class="card" style="padding: 16px; border-color: var(--color-error);">
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <span class="text-error">&#9888;</span>
+            <span class="text-error">@Message</span>
+        </div>
+        @if (OnRetry.HasDelegate)
+        {
+            <button class="btn btn-secondary" style="margin-top: 8px;" @onclick="OnRetry">
+                Retry
+            </button>
+        }
+    </div>
+}
+
+@code {
+    [Parameter] public string? Message { get; set; }
+    [Parameter] public EventCallback OnRetry { get; set; }
+}

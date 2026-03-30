@@ -1,4 +1,4 @@
-# ⏱️ Syon Time Dashboard
+# ⏱️ TimeTile
 
 [![.NET 10](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
 [![MAUI Blazor](https://img.shields.io/badge/MAUI-Blazor%20Hybrid-0078D4?logo=blazor)](https://learn.microsoft.com/en-us/aspnet/core/blazor/hybrid/)
@@ -39,12 +39,12 @@ A Windows desktop dashboard for tracking time on [Azure DevOps](https://dev.azur
 
 ```
 src/
-├── Syon.TimeDashboard/                 # MAUI host — app shell, config, platform code
-├── Syon.TimeDashboard.Core/            # Domain models, interfaces, enums
-├── Syon.TimeDashboard.Infrastructure/  # API clients, auth, persistence, services
-└── Syon.TimeDashboard.UI/              # Blazor components + Fluxor state stores
+├── TimeTile/                         # MAUI host — app shell, config, platform code
+├── TimeTile.Core/                    # Domain models, interfaces, enums
+├── TimeTile.Infrastructure/          # API clients, auth, persistence, services
+└── TimeTile.UI/                      # Blazor components + Fluxor state stores
 tests/
-└── Syon.TimeDashboard.Tests/           # xUnit tests
+└── TimeTile.Tests/                   # xUnit tests
 ```
 
 ### Tech Stack
@@ -76,13 +76,13 @@ tests/
 ### 1. Clone
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/Syon.TimeDashboard.git
-cd Syon.TimeDashboard
+git clone https://github.com/YOUR_USERNAME/TimeTile.git
+cd TimeTile
 ```
 
 ### 2. Configure
 
-Edit `src/Syon.TimeDashboard/appsettings.json`:
+Edit `src/TimeTile/appsettings.json`:
 
 ```json
 {
@@ -111,7 +111,7 @@ You need a [Microsoft Entra ID app registration](https://learn.microsoft.com/en-
 
 ```bash
 dotnet build
-dotnet run --project src/Syon.TimeDashboard
+dotnet run --project src/TimeTile
 ```
 
 ### 4. Authenticate
@@ -126,13 +126,13 @@ dotnet run --project src/Syon.TimeDashboard
 
 ```bash
 # Build the full solution
-dotnet build Syon.TimeDashboard.slnx
+dotnet build TimeTile.slnx
 
 # Run tests
 dotnet test
 
 # Publish a self-contained executable
-dotnet publish src/Syon.TimeDashboard -c Release -r win-x64 --self-contained -o ./publish
+dotnet publish src/TimeTile -c Release -r win-x64 --self-contained -o ./publish
 ```
 
 The `publish/` folder is a standalone app — zip it and share, no SDK needed on the target machine.

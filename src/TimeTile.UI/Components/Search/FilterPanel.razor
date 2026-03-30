@@ -1,0 +1,74 @@
+@inherits FluxorComponent
+
+@inject IState<FilterState> FilterState
+@inject IDispatcher Dispatcher
+
+<div class="filter-bar">
+    <div class="filter-group">
+        <select class="input input-sm" value="@FilterState.Value.SelectedProject" @onchange="OnProjectChanged">
+            <option value="">All Projects</option>
+            @foreach (var project in FilterState.Value.Projects)
+            {
+                <option value="@project">@project</option>
+            }
+        </select>
+    </div>
+
+    <div class="filter-group">
+        <select class="input input-sm" value="@FilterState.Value.SelectedTeam" @onchange="OnTeamChanged"
+                disabled="@string.IsNullOrEmpty(FilterState.Value.SelectedProject)">
+            <option value="">All Teams</option>
+            @foreach (var team in FilterState.Value.Teams)
+            {
+                <option value="@team.Name">@team.Name</option>
+            }
+        </select>
+    </div>
+
+    <div class="filter-group">
+        <select class="input input-sm" value="@FilterState.Value.SelectedIteration" @onchange="OnSprintChanged"
+                disabled="@string.IsNullOrEmpty(FilterState.Value.SelectedTeam)">
+            <option value="">All Sprints</option>
+            @foreach (var sprint in FilterState.Value.Sprints)
+            {
+                <option value="@sprint.Name">@sprint.Name @(sprint.IsCurrent ? "(Current)" : "")</option>
+            }
+        </select>
+    </div>
+
+    @if (!string.IsNullOrEmpty(FilterState.Value.SelectedProject))
+    {
+        <button class="btn btn-icon" title="Clear filters" @onclick="ClearFilters">&times;</button>
+    }
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        Dispatcher.Dispatch(new LoadProjectsAction());
+    }
+
+    private void OnProjectChanged(ChangeEventArgs e)
+    {
+        var value = e.Value?.ToString() ?? "";
+        Dispatcher.Dispatch(new SelectProjectAction(value));
+        if (!string.IsNullOrEmpty(value))
+            Dispatcher.Dispatch(new LoadTeamsAction(value));
+    }
+
+    private void OnTeamChanged(ChangeEventArgs e)
+    {
+        var value = e.Value?.ToString() ?? "";
+        Dispatcher.Dispatch(new SelectTeamAction(value));
+        if (!string.IsNullOrEmpty(value) && !string.IsNullOrEmpty(FilterState.Value.SelectedProject))
+            Dispatcher.Dispatch(new LoadSprintsAction(FilterState.Value.SelectedProject, value));
+    }
+
+    private void OnSprintChanged(ChangeEventArgs e)
+    {
+        Dispatcher.Dispatch(new SelectIterationAction(e.Value?.ToString() ?? ""));
+    }
+
+    private void ClearFilters() => Dispatcher.Dispatch(new ClearFiltersAction());
+}

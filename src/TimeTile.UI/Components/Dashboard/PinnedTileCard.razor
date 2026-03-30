@@ -1,0 +1,99 @@
+<div class="work-item-tile @(IsActive ? "active" : "")">
+    <div class="tile-header">
+        <span class="tile-id">#@Tile.WorkItemId</span>
+        <span class="tile-state @GetStateClass()">@Tile.State</span>
+    </div>
+
+    <div class="tile-title">@Tile.Title</div>
+
+    <div class="tile-meta">
+        <span>@Tile.ProjectName</span>
+        @if (!string.IsNullOrEmpty(Tile.IterationPath))
+        {
+            <span>&middot;</span>
+            <span>@GetShortIteration()</span>
+        }
+    </div>
+
+    @if (Tile.CompletedWork.HasValue || Tile.RemainingWork.HasValue || TotalTracked > TimeSpan.Zero)
+    {
+        <div class="tile-time">
+            @if (Tile.CompletedWork.HasValue || Tile.RemainingWork.HasValue)
+            {
+                @if (Tile.CompletedWork is > 0)
+                {
+                    <span class="tile-work-done" title="Completed work">✅ @FormatHours(Tile.CompletedWork.Value)</span>
+                }
+                @if (Tile.RemainingWork is > 0)
+                {
+                    <span class="tile-work-remaining" title="Remaining work">⏳ @FormatHours(Tile.RemainingWork.Value)</span>
+                }
+            }
+            @if (TotalTracked > TimeSpan.Zero)
+            {
+                <span title="Tracked today">&#128337; @FormatDuration(TotalTracked)</span>
+            }
+        </div>
+    }
+
+    <div class="tile-actions">
+        <button class="btn btn-secondary btn-icon" title="Unpin" @onclick="HandleUnpin" @onclick:stopPropagation="true">
+            &#10005;
+        </button>
+
+        @if (IsActive)
+        {
+            <button class="btn-stop" title="Stop tracking" @onclick="HandleStop" @onclick:stopPropagation="true">
+                &#9632;
+            </button>
+        }
+        else
+        {
+            <button class="btn-play" title="Start tracking" @onclick="HandleStart" @onclick:stopPropagation="true">
+                &#9654;
+            </button>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public PinnedTile Tile { get; set; } = default!;
+    [Parameter] public bool IsActive { get; set; }
+    [Parameter] public TimeSpan TotalTracked { get; set; }
+    [Parameter] public EventCallback<int> OnStartTracking { get; set; }
+    [Parameter] public EventCallback OnStopTracking { get; set; }
+    [Parameter] public EventCallback<int> OnUnpin { get; set; }
+
+    private string GetStateClass() => Tile.State?.ToLowerInvariant() switch
+    {
+        "new" => "new",
+        "active" => "active",
+        "resolved" => "resolved",
+        "closed" => "closed",
+        _ => ""
+    };
+
+    private string GetShortIteration()
+    {
+        var parts = Tile.IterationPath?.Split('\\');
+        return parts?.Length > 0 ? parts[^1] : Tile.IterationPath ?? "";
+    }
+
+    private Task HandleStart() => OnStartTracking.InvokeAsync(Tile.WorkItemId);
+    private Task HandleStop() => OnStopTracking.InvokeAsync();
+    private Task HandleUnpin() => OnUnpin.InvokeAsync(Tile.WorkItemId);
+
+    private static string FormatDuration(TimeSpan duration)
+    {
+        if (duration.TotalHours >= 1)
+            return $"{(int)duration.TotalHours}h {duration.Minutes:D2}m";
+        return $"{duration.Minutes}m";
+    }
+
+    private static string FormatHours(double hours)
+    {
+        var h = (int)hours;
+        var m = (int)((hours - h) * 60);
+        return h > 0 ? $"{h}h {m:D2}m" : $"{m}m";
+    }
+}
