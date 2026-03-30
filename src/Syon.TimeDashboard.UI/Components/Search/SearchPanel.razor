@@ -1,0 +1,99 @@
+@inherits FluxorComponent
+
+@inject IState<SearchState> SearchState
+@inject IDispatcher Dispatcher
+
+<div class="search-overlay" @onclick="Close">
+    <div class="search-panel" @onclick:stopPropagation="true">
+        <div class="search-header">
+            <h2>Search Work Items</h2>
+            <button class="btn-icon" @onclick="Close">&times;</button>
+        </div>
+
+        <div class="search-input-wrapper">
+            <input type="text"
+                   class="input"
+                   placeholder="Search by ID, title, or keyword..."
+                   @bind="query"
+                   @bind:event="oninput"
+                   @bind:after="OnQueryChanged"
+                   @onkeydown="OnKeyDown"
+                   autofocus />
+        </div>
+
+        @if (SearchState.Value.IsSearching)
+        {
+            <div style="display: flex; justify-content: center; padding: 24px;">
+                <LoadingSpinner />
+            </div>
+        }
+        else if (!string.IsNullOrEmpty(SearchState.Value.ErrorMessage))
+        {
+            <div class="search-error">@SearchState.Value.ErrorMessage</div>
+        }
+        else if (SearchState.Value.Results.Count == 0 && !string.IsNullOrEmpty(SearchState.Value.Query))
+        {
+            <div class="search-empty">No results found for "@SearchState.Value.Query"</div>
+        }
+        else
+        {
+            <div class="search-results">
+                @foreach (var item in SearchState.Value.Results)
+                {
+                    <div class="search-result-item" @onclick="() => PinItem(item)">
+                        <div class="result-header">
+                            <span class="result-id">#@item.Id</span>
+                            <span class="result-type">@item.WorkItemType</span>
+                        </div>
+                        <div class="result-title">@item.Title</div>
+                        <div class="result-meta">
+                            <span>@item.ProjectName</span>
+                            @if (!string.IsNullOrEmpty(item.State))
+                            {
+                                <span>&middot;</span>
+                                <span>@item.State</span>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private string query = "";
+    private System.Threading.Timer? _debounceTimer;
+
+    private void OnQueryChanged()
+    {
+        _debounceTimer?.Dispose();
+        _debounceTimer = new System.Threading.Timer(_ =>
+        {
+            InvokeAsync(() =>
+            {
+                if (query.Length >= 2)
+                    Dispatcher.Dispatch(new SearchWorkItemsAction(query));
+            });
+        }, null, 350, Timeout.Infinite);
+    }
+
+    private void OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape")
+            Close();
+    }
+
+    private void PinItem(WorkItem item)
+    {
+        Dispatcher.Dispatch(new PinWorkItemAction(item));
+        Dispatcher.Dispatch(new CloseSearchAction());
+    }
+
+    private void Close() => Dispatcher.Dispatch(new CloseSearchAction());
+
+    public void Dispose()
+    {
+        _debounceTimer?.Dispose();
+    }
+}

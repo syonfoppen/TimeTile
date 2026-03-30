@@ -1,0 +1,24 @@
+@inject NavigationManager Navigation
+
+<nav class="sidebar">
+    <div class="sidebar-header">
+        <div class="sidebar-logo">T</div>
+        <span class="sidebar-title">Time Dashboard</span>
+    </div>
+
+    <div class="sidebar-nav">
+        <NavLink class="nav-item" href="" Match="NavLinkMatch.All">
+            <span class="nav-icon">&#9711;</span>
+            <span>Dashboard</span>
+        </NavLink>
+
+        <NavLink class="nav-item" href="settings">
+            <span class="nav-icon">&#9881;</span>
+            <span>Settings</span>
+        </NavLink>
+    </div>
+
+    <div class="sidebar-footer">
+        <AuthStatusIndicator />
+    </div>
+</nav>

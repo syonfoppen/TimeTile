@@ -1,0 +1,31 @@
+<div class="tile-grid">
+    @foreach (var tile in Tiles)
+    {
+        <PinnedTileCard Tile="tile"
+                        IsActive="tile.WorkItemId == ActiveWorkItemId"
+                        TotalTracked="GetTotalTracked(tile.WorkItemId)"
+                        OnStartTracking="OnStartTracking"
+                        OnStopTracking="OnStopTracking"
+                        OnUnpin="OnUnpin" />
+    }
+</div>
+
+@code {
+    [Parameter] public IReadOnlyList<PinnedTile> Tiles { get; set; } = [];
+    [Parameter] public int? ActiveWorkItemId { get; set; }
+    [Parameter] public IReadOnlyList<TrackingSession> RecentSessions { get; set; } = [];
+    [Parameter] public EventCallback<int> OnStartTracking { get; set; }
+    [Parameter] public EventCallback OnStopTracking { get; set; }
+    [Parameter] public EventCallback<int> OnUnpin { get; set; }
+
+    private TimeSpan GetTotalTracked(int workItemId)
+    {
+        var total = TimeSpan.Zero;
+        foreach (var session in RecentSessions)
+        {
+            if (session.WorkItemId == workItemId)
+                total += session.Elapsed;
+        }
+        return total;
+    }
+}

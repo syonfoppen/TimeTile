@@ -1,0 +1,7 @@
+﻿<Router AppAssembly="@typeof(Syon.TimeDashboard.UI.Components.Layout.MainLayout).Assembly"
+        AdditionalAssemblies="new[] { typeof(MauiProgram).Assembly }">
+    <Found Context="routeData">
+        <RouteView RouteData="@routeData" DefaultLayout="@typeof(Syon.TimeDashboard.UI.Components.Layout.MainLayout)" />
+        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+    </Found>
+</Router>

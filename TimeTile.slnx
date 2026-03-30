@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Syon.TimeDashboard.Core/Syon.TimeDashboard.Core.csproj" />
+    <Project Path="src/Syon.TimeDashboard.Infrastructure/Syon.TimeDashboard.Infrastructure.csproj" />
+    <Project Path="src/Syon.TimeDashboard.UI/Syon.TimeDashboard.UI.csproj" />
+    <Project Path="src/Syon.TimeDashboard/Syon.TimeDashboard.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Syon.TimeDashboard.Tests/Syon.TimeDashboard.Tests.csproj" />
+  </Folder>
+</Solution>
